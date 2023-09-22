@@ -8,7 +8,7 @@ class Program
         Console.WriteLine("Exercice Linq");
         Console.WriteLine("*************");
         
-        del executerMethode = () => displayFilteredStudentsSeventh();
+        del executerMethode = () => displayOddResults();
         executerMethode();
     }
     #region Exercice 1
@@ -166,6 +166,65 @@ class Program
                                 $" section : {student.section} and" +
                                 $" last year result : {student.yearResult}/100");
         }
+    }
+    #endregion
+
+    #region Exercice 3.1
+    static void displayAverageResult()
+    {
+        DataContext context = new DataContext();
+        var QueryResult = context.Students.Average(s => s.Year_Result);
+
+        Console.WriteLine($"Average result is : {QueryResult}");
+    }
+    #endregion
+
+    #region Exercice 3.2
+    static void displayMaxResult()
+    {
+        DataContext context = new DataContext();
+        var QueryResult = context.Students.Max(s => s.Year_Result);
+
+        Console.WriteLine($"Max result is : {QueryResult}");
+    }
+    #endregion
+
+    #region Exercice 3.3
+    static void displaySumResults()
+    {
+        DataContext context = new DataContext();
+        var QueryResult = context.Students.Sum(s => s.Year_Result);
+
+        Console.WriteLine($"Sum of results is : {QueryResult}");
+    }
+    #endregion
+
+    #region Exercice 3.4
+    static void displayMinResult()
+    {
+        DataContext context = new DataContext();
+        var QueryResult = context.Students.Min(s => s.Year_Result);
+
+        Console.WriteLine($"Minimum result is : {QueryResult}");
+    }
+    #endregion
+
+    #region Exercice 3.5
+    static void displayOddResults()
+    {
+        DataContext context = new DataContext();
+        var QueryResult = context.Students.Count(s => s.Year_Result % 2 != 0);
+
+        Console.WriteLine($"number of odd result is : {QueryResult}");
+    }
+    #endregion
+
+    #region Exercice 4.1
+    static void displayMaxResultPerSection()
+    {
+        DataContext context = new DataContext();
+        int maxResult = 0;
+        var QueryResultStudents = context.Students;
     }
     #endregion
 }
