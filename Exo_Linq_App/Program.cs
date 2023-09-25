@@ -8,7 +8,7 @@ class Program
         Console.WriteLine("Exercice Linq");
         Console.WriteLine("*************");
         
-        del executerMethode = () => displayOddResults();
+        del executerMethode = () => displaySectionsMembers();
         executerMethode();
     }
     #region Exercice 1
@@ -223,10 +223,213 @@ class Program
     static void displayMaxResultPerSection()
     {
         DataContext context = new DataContext();
-        int maxResult = 0;
-        var QueryResultStudents = context.Students;
+        var queryResult = context.Students
+            .GroupBy(
+            s => s.Section_ID
+            )
+            .Select(g => new
+            {
+                section = g.Key,
+                maxResult = g.Max(s => s.Year_Result)
+            }
+            );
+
+        foreach(var s in queryResult)
+        {
+            Console.WriteLine($" Best score in section {s.section} : {s.maxResult}.");
+        }
     }
     #endregion
+
+    #region Exercice 4.2
+    static void displaySpecificSectionsAverageResult()
+    {
+        DataContext context = new DataContext();
+        var queryResult = context.Students
+            .GroupBy(
+            s => s.Section_ID
+            )
+            .Select(g => new
+            {
+                section = g.Key,
+                averageResult = g.Average(s => s.Year_Result)
+            }
+            )
+            .Where(g => g.section.ToString().StartsWith("10"));
+
+        foreach (var s in queryResult)
+        {
+            Console.WriteLine($" Average score in section {s.section} : {s.averageResult}.");
+        }
+    }
+    #endregion
+
+    #region Exercice 4.3
+    static void displaySpecificAgeAverageResult()
+    {
+        DataContext context = new DataContext();
+        var queryResult = context.Students
+            .Where(s => s.BirthDate.Year >= 1970 && s.BirthDate.Year <= 1985)
+            .GroupBy(
+            s => s.BirthDate.Month
+            )
+            .Select(s => new
+            {
+                birthdateMonth = s.Key,
+                averageResult = s.Average(s => s.Year_Result)
+            }
+            )
+            ;
+
+        foreach (var s in queryResult)
+        {
+            Console.WriteLine($" Average score in month {s.birthdateMonth} : {s.averageResult}.");
+        }
+    }
+    #endregion
+
+    #region Exercice 4.4
+    static void displaySectionWithMoreThanThreeAverageResult()
+    {
+        DataContext context = new DataContext();
+        var queryResult = context.Students
+            .GroupBy(
+            s => s.Section_ID
+            )
+            .Where(g => g.Count() > 3)
+            .Select(s => new
+            {
+                section = s.Key,
+                averageResult = s.Average(s => s.Year_Result)
+            }
+            )
+            ;
+
+        foreach (var s in queryResult)
+        {
+            Console.WriteLine($" Average score in section {s.section} : {s.averageResult}.");
+        }
+    }
+    #endregion
+
+    #region Exercice 4.5
+    static void displayCourseProfessorAndTheirSection()
+    {
+        DataContext context = new DataContext();
+        var queryResult = context.Courses
+            .Join(context.Professors,
+            c => c.Professor_ID,
+            p => p.Professor_ID,
+            (c, p) => new
+            {
+                course = c.Course_Name,
+                section = p.Section_ID,
+                professor = p.Professor_Name
+            }
+            );
+
+        foreach (var c in queryResult)
+        {
+            Console.WriteLine($"for the {c.course} course, its professor is {c.professor.ToUpper()} which is in section {c.section}");
+        }
+    }
+    #endregion
+
+    #region Exercice 4.6
+    static void displaySectionsDetails()
+    {
+        DataContext context = new DataContext();
+        var queryResult = context.Sections
+            .Join(context.Students,
+            section => section.Delegate_ID,
+            student => student.Student_ID,
+            (section, student) => new
+            {
+                sectionId = section.Section_ID,
+                sectionName = section.Section_Name,
+                delegateStudent = student.Last_Name
+            }
+            )
+            .OrderByDescending(s => s.sectionId);
+
+        foreach (var s in queryResult)
+        {
+            Console.WriteLine($"for section {s.sectionId} : {s.sectionName}, its delegate is {s.delegateStudent}");
+        }
+    }
+    #endregion
+
+    #region Exercice 4.7
+    static void displaySectionsMembers()
+    {
+        DataContext context = new DataContext();
+        var queryResult = context.Professors
+            .Join(context.Sections,
+            p => p.Section_ID,
+            s => s.Section_ID,
+            (p, s) => new
+            {
+                sectionId = s.Section_ID,
+                sectionName = s.Section_Name,
+                professorName = p.Professor_Name
+            }
+            )
+            .GroupBy(s => new {s.sectionId, s.sectionName})
+            .OrderByDescending(s => s.Key.sectionId);
+
+        foreach (var s in queryResult)
+        {
+            Console.WriteLine($"{s.Key.sectionId} - {s.Key.sectionName} : ");
+            foreach(var p in s)
+            {
+            Console.WriteLine($"{p.professorName}");
+            }
+        }
+    }
+    #endregion
+
+    #region Exercice 4.8 TODO CAUSE THE FIRST ALREADY DOES IT
+    static void displaySectionsWithAtLeastOneMember()
+    {
+        DataContext context = new DataContext();
+        var queryResult = context.Professors
+            .Join(context.Sections,
+            p => p.Section_ID,
+            s => s.Section_ID,
+            (p, s) => new
+            {
+                sectionId = s.Section_ID,
+                sectionName = s.Section_Name,
+                professorName = p.Professor_Name
+            }
+            )
+            .GroupBy(s => new { s.sectionId, s.sectionName })
+            .OrderByDescending(s => s.Key);
+
+        foreach (var s in queryResult)
+        {
+            Console.WriteLine($"{s.Key.sectionId} - {s.Key.sectionName} : ");
+            foreach (var p in s)
+            {
+                Console.WriteLine($"{p.professorName}");
+            }
+        }
+    }
+    #endregion
+
+    //#region Exercice 4.9
+    //static void displaySpecificStudentsAndTheirGrades()
+    //{
+    //    DataContext context = new DataContext();
+    //    var queryResult = context.Students
+    //        .Join(context.Grades,
+    //        s => s.Year_Result,
+    //        g => g.Lower_Bound
+    //        )
+
+        
+    //}
+    //#endregion
 }
 
 
